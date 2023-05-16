@@ -3,16 +3,22 @@ import axios from "axios";
 import { Person } from "./components/Person";
 import { NewEntry } from "./components/NewEntry";
 import { Filter } from "./components/Filter";
+import { Notification } from "./components/Notification";
+import bookService from "./services/book";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newPerson, setNewPerson] = useState({ name: "", number: "" });
   const [filter, setFilter] = useState("");
+  const [notification, setNotification] = useState({
+    message: null,
+    status: "",
+  });
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3001/persons")
-      .then((response) => setPersons(response.data));
+    bookService
+      .readAll()
+      .then((returnedPersons) => setPersons(returnedPersons));
   }, []);
 
   // update newPerson state onChange
@@ -46,15 +52,64 @@ const App = () => {
 
     // if not, then add it to persons state
     if (!exists) {
-      setPersons((prevPersons) => {
-        return [
-          ...prevPersons,
-          { name: newPerson.name, number: newPerson.number },
-        ];
+      bookService.create(newPerson).then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson));
+        setNewPerson({ name: "", number: "" });
+
+        setNotification({
+          message: `Added ${newPerson.name}`,
+          status: "successful",
+        });
+
+        setTimeout(() => {
+          setNotification({ message: null, status: "" });
+        }, 5000);
       });
-      setNewPerson({ name: "", number: "" });
     } else {
-      alert(`${newPerson.name} is already added to phonebook`);
+      const match = persons.find(
+        (p) => p.name.toLowerCase() === newPerson.name.toLowerCase()
+      );
+      if (
+        window.confirm(
+          `${match.name} already exists in phonebook, replace the old number with a new one?`
+        )
+      ) {
+        bookService.update(match, newPerson).then((returnedPerson) => {
+          setPersons(
+            persons.map(
+              (p) =>
+                p.name !== match.name
+                  ? p
+                  : { ...p, number: returnedPerson.number } // only change the number
+            )
+          );
+          setNewPerson({ name: "", number: "" });
+        });
+      }
+    }
+  };
+
+  const handleDelete = ({ id, name }) => {
+    const foundPerson = persons.find((p) => p.id === id);
+
+    if (window.confirm(`Delete ${foundPerson.name}?`)) {
+      bookService
+        .remove(id)
+        .then((returnedPersons) => {
+          setPersons(persons.filter((p) => p.id !== id));
+        })
+        .catch((error) => {
+          setNotification({
+            message: `Information of ${name} has already been removed from server`,
+            status: "error",
+          });
+
+          setTimeout(() => {
+            setNotification({ message: null, status: "" });
+          }, 5000);
+
+          setPersons(persons.filter((person) => person.id !== id));
+        });
     }
   };
 
@@ -63,12 +118,17 @@ const App = () => {
 
   // make array of divs from filtered array
   const book = filtered.map((person) => (
-    <Person key={person.id} person={person} />
+    <Person
+      key={person.id}
+      person={person}
+      deletePerson={() => handleDelete(person)}
+    />
   ));
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notification={notification} />
       <Filter filter={filter} handleFilter={handleFilter} />
       <h2>Add a new</h2>
       <NewEntry
