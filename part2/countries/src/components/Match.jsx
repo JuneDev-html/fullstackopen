@@ -10,7 +10,7 @@ export const Match = ({ country }) => {
     getWeather(country.name.common).then((result) => setWeather(result));
   }, [country.name.common]);
 
-  if (!weather) return null;
+  // if (!weather) return null;
 
   let languages = [];
   for (let language in country.languages) {

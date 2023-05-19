@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Person } from "./components/Person";
 import { NewEntry } from "./components/NewEntry";
 import { Filter } from "./components/Filter";
