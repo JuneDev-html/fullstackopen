@@ -80,7 +80,6 @@ app.post('/api/notes', (request, response) => {
     important: body.important || false,
     id: generateId(),
   };
-  console.log(note);
   notes = notes.concat(note);
 
   response.json(note);
