@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 
 app.use(express.json());
+app.use(express.static('dist'));
 app.use(cors());
 
 let notes = [
@@ -24,7 +25,7 @@ let notes = [
 ];
 
 // handle http GET requests from application root
-app.get('/', (request, response) => response.send('<h1>Hello World!</h1>'));
+// app.get('/', (request, response) => response.send('<h1>Hello World!</h1>'));
 
 // handle http GET requests from 'notes' path of application fo ALL resources
 app.get('/api/notes', (request, response) => response.json(notes));
@@ -53,9 +54,6 @@ app.delete('/api/notes/:id', (request, response) => {
 
 // handle HTTP POST request to add new note to server
 app.post('/api/notes', (request, response) => {
-  // const note = request.body;
-  // console.log(note);
-  // response.json(note);
   const body = request.body;
 
   if (!body.content) {
