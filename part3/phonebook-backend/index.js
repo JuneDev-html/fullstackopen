@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const app = express();
 
 //  ------- ---- Middleware ---- --------
@@ -18,6 +19,7 @@ const unknownEndpoint = (request, response) => {
 // Custom morgan token that shows body of request
 morgan.token('body', (req) => JSON.stringify(req.body));
 
+app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
 // ------ ------ --- END Middleware --- ----- ----------
