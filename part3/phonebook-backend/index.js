@@ -12,9 +12,9 @@ const requestLogger = (request, response, next) => {
   next();
 };
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' });
-};
+// const unknownEndpoint = (request, response) => {
+//   response.status(404).send({ error: 'unknown endpoint' });
+// };
 
 // Custom morgan token that shows body of request
 morgan.token('body', (req) => JSON.stringify(req.body));
@@ -22,6 +22,7 @@ morgan.token('body', (req) => JSON.stringify(req.body));
 app.use(cors());
 app.use(express.json());
 app.use(requestLogger);
+app.use(express.static('build'));
 // ------ ------ --- END Middleware --- ----- ----------
 
 let phonebook = [
@@ -119,7 +120,7 @@ const generateId = () => {
 };
 // ----- END Helper Functions -------
 
-app.use(unknownEndpoint);
+// app.use(unknownEndpoint);
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
